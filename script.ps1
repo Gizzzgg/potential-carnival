@@ -32,13 +32,13 @@ foreach ($xmlFile in $xmlFiles) {
 
     try {
         # Senden Sie die Anfrage
-        $response = Invoke-RestMethod -Uri $uri -Method Post -Form @{
+        $response = Invoke-WebRequest -Uri $uri -Method Post -ContentType "multipart/form-data" -Form @{
             document = Get-Item $xmlFile.FullName
         }
-        if ($response.ok) {
+        if ($response.StatusCode -eq 200) {
             Write-Host "Erfolgreich an den Telegram-Bot gesendet: $($xmlFile.Name)"
         } else {
-            Write-Host "Fehler beim Senden an den Telegram-Bot: $($response.description)"
+            Write-Host "Fehler beim Senden an den Telegram-Bot: $($response.StatusCode)"
         }
     } catch {
         Write-Host "Fehler beim Senden an den Telegram-Bot: $_"
